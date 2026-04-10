@@ -1,5 +1,7 @@
 import type { NextConfig } from 'next'
 
+const isProd = process.env.NODE_ENV === 'production'
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
@@ -29,7 +31,9 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js 需要 unsafe-eval in dev
+              isProd
+                ? "script-src 'self' 'unsafe-inline'"
+                : "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // unsafe-eval only in dev
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https://lh3.googleusercontent.com", // Google 頭像

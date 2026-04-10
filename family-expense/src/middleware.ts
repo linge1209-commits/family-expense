@@ -42,11 +42,18 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && !isPublic) {
+    // email 必須存在且格式合理
+    const email = user.email ?? ''
+    if (!email || email.length > 254 || !email.includes('@')) {
+      await supabase.auth.signOut()
+      return NextResponse.redirect(new URL('/login?error=not_authorized', request.url))
+    }
+
     // 驗證是否在家庭成員白名單
     const { data: member } = await supabase
       .from('family_members')
       .select('email')
-      .eq('email', user.email ?? '')
+      .eq('email', email)
       .maybeSingle()
 
     if (!member) {

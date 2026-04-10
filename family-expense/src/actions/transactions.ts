@@ -4,9 +4,11 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { TransactionInsert, TransactionWithCategory } from '@/lib/supabase/types'
 
+const FORMULA_INJECTION_RE = /^[=+\-@\t\r]/
+
 function sanitizeDescription(text: string): string {
   const trimmed = text.trim()
-  if (trimmed.length > 0 && (trimmed.startsWith('=') || trimmed.startsWith('+') || trimmed.startsWith('-') || trimmed.startsWith('@'))) {
+  if (FORMULA_INJECTION_RE.test(trimmed)) {
     throw new Error('描述欄位包含非法字元')
   }
   return trimmed
@@ -101,6 +103,9 @@ export async function updateTransaction(id: string, formData: FormData) {
 }
 
 export async function getTransactions(year: number, month: number) {
+  if (!Number.isInteger(year) || year < 2000 || year > 2100) throw new Error('年份無效')
+  if (!Number.isInteger(month) || month < 1 || month > 12) throw new Error('月份無效')
+
   const supabase = await createClient()
 
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`
