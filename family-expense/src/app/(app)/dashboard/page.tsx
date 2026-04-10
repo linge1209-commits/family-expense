@@ -61,8 +61,8 @@ export default async function DashboardPage() {
         {topCategories.length > 0 && (
           <div className="flex gap-3 mt-4 flex-wrap">
             {topCategories.map(cat => (
-              <div key={cat.id} className="bg-blue-500/40 rounded-lg px-3 py-1.5 text-sm">
-                {cat.icon} {cat.name} {formatCurrency(categoryTotals[cat.id] ?? 0)}
+              <div key={cat.id} className="bg-blue-500/40 rounded-lg px-3 py-1.5 text-sm text-white font-medium">
+                {cat.icon} {cat.name} <span className="text-blue-100">{formatCurrency(categoryTotals[cat.id] ?? 0)}</span>
               </div>
             ))}
           </div>
