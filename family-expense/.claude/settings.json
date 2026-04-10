@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://github.com/linge1209-commits/family-expense)"
+    ]
+  }
+}

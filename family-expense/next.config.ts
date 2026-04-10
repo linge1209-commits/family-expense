@@ -4,6 +4,14 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: '/sw.js',
+        headers: [
+          { key: 'Content-Type', value: 'application/javascript; charset=utf-8' },
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self'" },
+        ],
+      },
+      {
         source: '/(.*)',
         headers: [
           // 防止點擊劫持
@@ -27,6 +35,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: https://lh3.googleusercontent.com", // Google 頭像
               `connect-src 'self' https://*.supabase.co wss://*.supabase.co`,
               "frame-ancestors 'none'",
+              "worker-src 'self'",
             ].join('; '),
           },
         ],
