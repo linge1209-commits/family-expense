@@ -79,8 +79,8 @@ export default async function ReportsPage() {
                 <span className="text-2xl">{cat.icon}</span>
                 <div className="flex-1">
                   <div className="flex justify-between text-sm font-medium mb-1">
-                    <span>{cat.name}</span>
-                    <span>{formatCurrency(cat.total)}</span>
+                    <span className="text-gray-800">{cat.name}</span>
+                    <span className="text-gray-800">{formatCurrency(cat.total)}</span>
                   </div>
                   <div className="h-1.5 bg-gray-100 rounded-full">
                     <div
