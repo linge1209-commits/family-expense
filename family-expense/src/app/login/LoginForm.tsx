@@ -18,7 +18,7 @@ export default function LoginForm() {
           type="email"
           required
           autoComplete="email"
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
           placeholder="your@email.com"
         />
       </div>
@@ -33,7 +33,7 @@ export default function LoginForm() {
           type="password"
           required
           autoComplete="current-password"
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
           placeholder="••••••••"
         />
       </div>
