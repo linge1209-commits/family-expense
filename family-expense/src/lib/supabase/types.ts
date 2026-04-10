@@ -92,18 +92,21 @@ export type Database = {
           icon: string
           monthly_budget: number | null
           sort_order: number
+          type: 'expense' | 'income'
         }
         Insert: {
           name: string
           icon?: string
           monthly_budget?: number | null
           sort_order?: number
+          type?: 'expense' | 'income'
         }
         Update: {
           name?: string
           icon?: string
           monthly_budget?: number | null
           sort_order?: number
+          type?: 'expense' | 'income'
         }
         Relationships: []
       }
@@ -118,6 +121,7 @@ export type Database = {
           added_by: string | null
           added_by_email: string
           ledger_id: string | null
+          type: 'expense' | 'income'
           created_at: string
           updated_at: string
         }
@@ -131,6 +135,7 @@ export type Database = {
           added_by?: string | null
           added_by_email: string
           ledger_id?: string | null
+          type?: 'expense' | 'income'
           created_at?: string
           updated_at?: string
         }
@@ -141,6 +146,7 @@ export type Database = {
           description?: string
           payer?: string
           ledger_id?: string | null
+          type?: 'expense' | 'income'
           updated_at?: string
         }
         Relationships: [

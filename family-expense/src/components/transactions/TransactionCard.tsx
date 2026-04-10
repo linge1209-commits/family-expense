@@ -37,7 +37,9 @@ export default function TransactionCard({ transaction: tx, currentUserId }: Prop
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-base font-bold text-gray-800">{formatCurrency(tx.amount)}</span>
+        <span className={`text-base font-bold ${tx.type === 'income' ? 'text-green-600' : 'text-gray-800'}`}>
+          {tx.type === 'income' ? '+' : ''}{formatCurrency(tx.amount)}
+        </span>
         {isOwner && (
           <button
             onClick={handleDelete}

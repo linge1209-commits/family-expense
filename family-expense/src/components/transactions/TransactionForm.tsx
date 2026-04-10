@@ -17,11 +17,19 @@ export default function TransactionForm({ categories, members, currentUserEmail,
   const formRef = useRef<HTMLFormElement>(null)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [txType, setTxType] = useState<'expense' | 'income'>('expense')
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [selectedLedger, setSelectedLedger] = useState<string | null>(ledgers[0]?.id ?? null)
 
   const currentMember = members.find(m => m.email === currentUserEmail)
   const [payer, setPayer] = useState(currentMember?.display_name ?? '')
+
+  const filteredCategories = categories.filter(c => c.type === txType)
+
+  function handleTypeChange(type: 'expense' | 'income') {
+    setTxType(type)
+    setSelectedCategory(null)
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -29,6 +37,7 @@ export default function TransactionForm({ categories, members, currentUserEmail,
     const form = e.currentTarget
     const formData = new FormData(form)
     if (selectedCategory) formData.set('category_id', String(selectedCategory))
+    formData.set('type', txType)
 
     startTransition(async () => {
       try {
@@ -43,6 +52,8 @@ export default function TransactionForm({ categories, members, currentUserEmail,
     })
   }
 
+  const isIncome = txType === 'income'
+
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
       {error && (
@@ -50,6 +61,28 @@ export default function TransactionForm({ categories, members, currentUserEmail,
           {error}
         </div>
       )}
+
+      {/* 收入 / 支出切換 */}
+      <div className="flex rounded-xl overflow-hidden border-2 border-gray-200">
+        <button
+          type="button"
+          onClick={() => handleTypeChange('expense')}
+          className={`flex-1 py-3 font-semibold text-sm transition-colors ${
+            !isIncome ? 'bg-red-500 text-white' : 'bg-white text-gray-500'
+          }`}
+        >
+          支出
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTypeChange('income')}
+          className={`flex-1 py-3 font-semibold text-sm transition-colors ${
+            isIncome ? 'bg-green-500 text-white' : 'bg-white text-gray-500'
+          }`}
+        >
+          收入
+        </button>
+      </div>
 
       {/* 帳本 */}
       {ledgers.length > 0 && (
@@ -89,7 +122,9 @@ export default function TransactionForm({ categories, members, currentUserEmail,
             max="1000000"
             required
             placeholder="0"
-            className="w-full pl-8 pr-4 py-4 text-2xl font-bold text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
+            className={`w-full pl-8 pr-4 py-4 text-2xl font-bold text-gray-900 bg-white border-2 rounded-xl focus:outline-none ${
+              isIncome ? 'focus:border-green-500 border-gray-200' : 'focus:border-red-400 border-gray-200'
+            }`}
           />
         </div>
       </div>
@@ -98,14 +133,16 @@ export default function TransactionForm({ categories, members, currentUserEmail,
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">分類</label>
         <div className="grid grid-cols-4 gap-2">
-          {categories.map(cat => (
+          {filteredCategories.map(cat => (
             <button
               key={cat.id}
               type="button"
               onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
               className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
                 selectedCategory === cat.id
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  ? isIncome
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : 'border-blue-500 bg-blue-50 text-blue-700'
                   : 'border-gray-100 bg-gray-50 text-gray-600'
               }`}
             >
@@ -123,14 +160,16 @@ export default function TransactionForm({ categories, members, currentUserEmail,
           name="description"
           type="text"
           maxLength={200}
-          placeholder="例：麥當勞午餐"
+          placeholder={isIncome ? '例：三月薪資' : '例：麥當勞午餐'}
           className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
         />
       </div>
 
       {/* 付款人 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">付款人</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {isIncome ? '收款人' : '付款人'}
+        </label>
         <div className="flex gap-2 flex-wrap">
           {members.map(member => (
             <button
@@ -164,9 +203,11 @@ export default function TransactionForm({ categories, members, currentUserEmail,
       <button
         type="submit"
         disabled={isPending || !payer}
-        className="w-full py-4 bg-blue-600 text-white text-lg font-bold rounded-xl disabled:opacity-50 active:scale-95 transition-transform"
+        className={`w-full py-4 text-white text-lg font-bold rounded-xl disabled:opacity-50 active:scale-95 transition-all ${
+          isIncome ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-600 hover:bg-blue-700'
+        }`}
       >
-        {isPending ? '新增中...' : '記帳'}
+        {isPending ? '新增中...' : isIncome ? '記錄收入' : '記帳'}
       </button>
     </form>
   )

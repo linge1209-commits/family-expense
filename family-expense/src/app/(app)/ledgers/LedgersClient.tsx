@@ -11,6 +11,7 @@ interface LedgerWithBalance {
   initial_balance: number
   balance: number
   spent: number
+  income: number
   transferIn: number
   transferOut: number
   created_by: string | null
@@ -93,7 +94,8 @@ export default function LedgersClient({ ledgers, currentUserId }: Props) {
                     <div className="font-semibold text-gray-800">{l.name}</div>
                     <div className="text-xs text-gray-400">
                       初始 {formatCurrency(l.initial_balance)} · 支出 {formatCurrency(l.spent)}
-                      {l.transferIn > 0 && <span className="text-green-500"> · 轉入 +{formatCurrency(l.transferIn)}</span>}
+                      {l.income > 0 && <span className="text-green-500"> · 收入 +{formatCurrency(l.income)}</span>}
+                      {l.transferIn > 0 && <span className="text-blue-500"> · 轉入 +{formatCurrency(l.transferIn)}</span>}
                       {l.transferOut > 0 && <span className="text-orange-500"> · 轉出 -{formatCurrency(l.transferOut)}</span>}
                     </div>
                   </div>

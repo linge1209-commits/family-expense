@@ -17,7 +17,8 @@ export default async function HistoryPage({ searchParams }: Props) {
   const month = parseInt(params.month ?? String(currentMonth))
 
   const transactions = await getTransactions(year, month)
-  const total = transactions.reduce((sum, tx) => sum + tx.amount, 0)
+  const expense = transactions.filter(tx => tx.type !== 'income').reduce((sum, tx) => sum + tx.amount, 0)
+  const income = transactions.filter(tx => tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0)
 
   // 產生最近 6 個月選項
   const monthOptions: { year: number; month: number; label: string }[] = []
@@ -59,9 +60,13 @@ export default async function HistoryPage({ searchParams }: Props) {
       {/* 月份小計 */}
       <div className="bg-white rounded-xl p-4 border border-gray-100">
         <div className="text-sm text-gray-500">{formatMonthYear(year, month)} 共 {transactions.length} 筆</div>
-        <div className="text-2xl font-bold text-gray-800 mt-1">
-          NT$ {total.toLocaleString('zh-TW')}
-        </div>
+        <div className="text-2xl font-bold text-gray-800 mt-1">支出 {expense.toLocaleString('zh-TW')}</div>
+        {income > 0 && (
+          <div className="flex gap-4 text-sm mt-1">
+            <span className="text-green-600 font-medium">收入 +{income.toLocaleString('zh-TW')}</span>
+            <span className="text-gray-500">淨 {(income - expense) >= 0 ? '+' : ''}{(income - expense).toLocaleString('zh-TW')}</span>
+          </div>
+        )}
       </div>
 
       {/* 交易列表 */}

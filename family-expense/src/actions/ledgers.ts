@@ -108,14 +108,20 @@ export async function getLedgersWithBalance() {
   if (!ledgers || ledgers.length === 0) return []
 
   const [{ data: txns }, { data: transfers }] = await Promise.all([
-    supabase.from('transactions').select('ledger_id, amount').not('ledger_id', 'is', null),
+    supabase.from('transactions').select('ledger_id, amount, type').not('ledger_id', 'is', null),
     supabase.from('ledger_transfers').select('from_ledger_id, to_ledger_id, amount'),
   ])
 
-  const spentByLedger = (txns ?? []).reduce<Record<string, number>>((acc, tx) => {
-    if (tx.ledger_id) acc[tx.ledger_id] = (acc[tx.ledger_id] ?? 0) + tx.amount
-    return acc
-  }, {})
+  const spentByLedger: Record<string, number> = {}
+  const incomeByLedger: Record<string, number> = {}
+  for (const tx of txns ?? []) {
+    if (!tx.ledger_id) continue
+    if (tx.type === 'income') {
+      incomeByLedger[tx.ledger_id] = (incomeByLedger[tx.ledger_id] ?? 0) + tx.amount
+    } else {
+      spentByLedger[tx.ledger_id] = (spentByLedger[tx.ledger_id] ?? 0) + tx.amount
+    }
+  }
 
   // 轉出 = 減少，轉入 = 增加
   const transferNetByLedger = (transfers ?? []).reduce<Record<string, number>>((acc, t) => {
@@ -126,8 +132,9 @@ export async function getLedgersWithBalance() {
 
   return ledgers.map(l => ({
     ...l,
-    balance: l.initial_balance - (spentByLedger[l.id] ?? 0) + (transferNetByLedger[l.id] ?? 0),
+    balance: l.initial_balance - (spentByLedger[l.id] ?? 0) + (incomeByLedger[l.id] ?? 0) + (transferNetByLedger[l.id] ?? 0),
     spent: spentByLedger[l.id] ?? 0,
+    income: incomeByLedger[l.id] ?? 0,
     transferIn: Math.max(0, transferNetByLedger[l.id] ?? 0),
     transferOut: Math.abs(Math.min(0, transferNetByLedger[l.id] ?? 0)),
   }))

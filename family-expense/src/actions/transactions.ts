@@ -34,6 +34,7 @@ export async function addTransaction(formData: FormData) {
   const date = (formData.get('date') as string) || new Date().toISOString().split('T')[0]
 
   const ledgerId = formData.get('ledger_id') as string | null
+  const type = (formData.get('type') as string) === 'income' ? 'income' : 'expense'
 
   const insert: TransactionInsert = {
     amount,
@@ -41,6 +42,7 @@ export async function addTransaction(formData: FormData) {
     payer,
     category_id: categoryId ? parseInt(categoryId as string) : null,
     ledger_id: ledgerId || null,
+    type,
     date,
     added_by: user.id,
     added_by_email: user.email!,

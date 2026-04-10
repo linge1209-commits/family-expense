@@ -14,6 +14,18 @@ export async function getCategories() {
   return data ?? []
 }
 
+export async function getCategoriesByType(type: 'expense' | 'income') {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('type', type)
+    .order('sort_order')
+
+  if (error) throw new Error(error.message)
+  return data ?? []
+}
+
 export async function getMonthlyBudgets(year: number, month: number) {
   const supabase = await createClient()
   const { data, error } = await supabase

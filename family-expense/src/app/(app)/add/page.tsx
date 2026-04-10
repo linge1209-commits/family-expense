@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCategories, getFamilyMembers } from '@/actions/categories'
+// getCategories returns all types; TransactionForm filters by selected type
 import { getLedgers } from '@/actions/ledgers'
 import TransactionForm from '@/components/transactions/TransactionForm'
 

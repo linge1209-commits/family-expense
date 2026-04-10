@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir \"C:\\\\Users\\\\brian_lin\\\\source\\\\repos\\\\FamilyMoney\")"
+      "Bash(dir \"C:\\\\Users\\\\brian_lin\\\\source\\\\repos\\\\FamilyMoney\")",
+      "Bash(npm run:*)"
     ]
   }
 }

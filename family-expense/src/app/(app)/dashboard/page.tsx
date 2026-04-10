@@ -23,10 +23,12 @@ export default async function DashboardPage() {
     const d = new Date(tx.date)
     return d.getFullYear() === year && d.getMonth() + 1 === month
   })
-  const totalThisMonth = thisMonthTxns.reduce((sum, tx) => sum + tx.amount, 0)
+  const expenseThisMonth = thisMonthTxns.filter(tx => tx.type !== 'income').reduce((sum, tx) => sum + tx.amount, 0)
+  const incomeThisMonth = thisMonthTxns.filter(tx => tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0)
+  const totalThisMonth = expenseThisMonth
 
-  // 分類小計
-  const categoryTotals = thisMonthTxns.reduce<Record<number, number>>((acc, tx) => {
+  // 分類小計（只算支出）
+  const categoryTotals = thisMonthTxns.filter(tx => tx.type !== 'income').reduce<Record<number, number>>((acc, tx) => {
     if (tx.category_id) {
       acc[tx.category_id] = (acc[tx.category_id] ?? 0) + tx.amount
     }
@@ -57,6 +59,15 @@ export default async function DashboardPage() {
       <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-lg">
         <div className="text-4xl font-bold">{formatCurrency(totalThisMonth)}</div>
         <div className="text-blue-200 text-sm mt-1">{thisMonthTxns.length} 筆記錄</div>
+        {incomeThisMonth > 0 && (
+          <div className="flex gap-4 mt-3 text-sm">
+            <span className="text-green-300">收入 +{formatCurrency(incomeThisMonth)}</span>
+            <span className="text-red-300">支出 -{formatCurrency(expenseThisMonth)}</span>
+            <span className={incomeThisMonth >= expenseThisMonth ? 'text-green-200' : 'text-red-200'}>
+              淨 {incomeThisMonth >= expenseThisMonth ? '+' : ''}{formatCurrency(incomeThisMonth - expenseThisMonth)}
+            </span>
+          </div>
+        )}
 
         {topCategories.length > 0 && (
           <div className="flex gap-3 mt-4 flex-wrap">
