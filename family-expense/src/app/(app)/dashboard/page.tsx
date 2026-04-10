@@ -3,6 +3,7 @@ import { getRecentTransactions } from '@/actions/transactions'
 import { getCategories } from '@/actions/categories'
 import { getLedgersWithBalance } from '@/actions/ledgers'
 import TransactionCard from '@/components/transactions/TransactionCard'
+import SpecialDayGreeting from '@/components/SpecialDayGreeting'
 import { formatCurrency, formatMonthYear, getCurrentYearMonth } from '@/lib/utils'
 import { signOut } from '@/actions/auth'
 import Link from 'next/link'
@@ -54,6 +55,8 @@ export default async function DashboardPage() {
           </button>
         </form>
       </div>
+
+      <SpecialDayGreeting />
 
       {/* 總金額卡片 */}
       <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-lg">
