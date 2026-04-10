@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useTransition } from 'react'
+import { useRef, useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { addTransaction } from '@/actions/transactions'
 import type { Category, FamilyMember, Ledger } from '@/lib/supabase/types'
@@ -12,6 +12,9 @@ interface Props {
   ledgers: Ledger[]
 }
 
+const LS_LEDGER = 'tx_last_ledger'
+const LS_PAYER  = 'tx_last_payer'
+
 export default function TransactionForm({ categories, members, currentUserEmail, ledgers }: Props) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
@@ -19,10 +22,34 @@ export default function TransactionForm({ categories, members, currentUserEmail,
   const [error, setError] = useState<string | null>(null)
   const [txType, setTxType] = useState<'expense' | 'income'>('expense')
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
-  const [selectedLedger, setSelectedLedger] = useState<string | null>(ledgers[0]?.id ?? null)
 
   const currentMember = members.find(m => m.email === currentUserEmail)
+
+  // 初始值先用 currentMember / 第一個帳本，useEffect 再從 localStorage 覆蓋
+  const [selectedLedger, setSelectedLedger] = useState<string | null>(ledgers[0]?.id ?? null)
   const [payer, setPayer] = useState(currentMember?.display_name ?? '')
+
+  useEffect(() => {
+    const savedLedger = localStorage.getItem(LS_LEDGER)
+    const savedPayer  = localStorage.getItem(LS_PAYER)
+    if (savedLedger && ledgers.some(l => l.id === savedLedger)) {
+      setSelectedLedger(savedLedger)
+    }
+    if (savedPayer && members.some(m => m.display_name === savedPayer)) {
+      setPayer(savedPayer)
+    }
+  }, [])
+
+  function handleSetLedger(id: string | null) {
+    setSelectedLedger(id)
+    if (id) localStorage.setItem(LS_LEDGER, id)
+    else localStorage.removeItem(LS_LEDGER)
+  }
+
+  function handleSetPayer(name: string) {
+    setPayer(name)
+    localStorage.setItem(LS_PAYER, name)
+  }
 
   const filteredCategories = categories.filter(c => c.type === txType)
 
@@ -44,7 +71,6 @@ export default function TransactionForm({ categories, members, currentUserEmail,
         await addTransaction(formData)
         formRef.current?.reset()
         setSelectedCategory(null)
-        setSelectedLedger(ledgers[0]?.id ?? null)
         router.push('/dashboard')
       } catch (err) {
         setError(err instanceof Error ? err.message : '新增失敗')
@@ -93,7 +119,7 @@ export default function TransactionForm({ categories, members, currentUserEmail,
               <button
                 key={ledger.id}
                 type="button"
-                onClick={() => setSelectedLedger(selectedLedger === ledger.id ? null : ledger.id)}
+                onClick={() => handleSetLedger(selectedLedger === ledger.id ? null : ledger.id)}
                 className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-all ${
                   selectedLedger === ledger.id
                     ? 'border-blue-500 bg-blue-500 text-white'
@@ -175,7 +201,7 @@ export default function TransactionForm({ categories, members, currentUserEmail,
             <button
               key={member.id}
               type="button"
-              onClick={() => setPayer(member.display_name)}
+              onClick={() => handleSetPayer(member.display_name)}
               className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-all ${
                 payer === member.display_name
                   ? 'border-blue-500 bg-blue-500 text-white'
