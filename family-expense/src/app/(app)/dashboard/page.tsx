@@ -87,7 +87,7 @@ export default async function DashboardPage() {
             <h2 className="font-bold text-gray-700">帳本餘額</h2>
             <Link href="/ledgers" className="text-sm text-blue-500">管理</Link>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {ledgers.map(l => (
               <div key={l.id} className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm">
                 <div className="flex items-center gap-2 mb-1">
