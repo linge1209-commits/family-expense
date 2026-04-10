@@ -93,11 +93,11 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-3 gap-2">
             {ledgers.map(l => (
               <div key={l.id} className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xl">{l.icon}</span>
-                  <span className="text-sm font-medium text-gray-700 truncate">{l.name}</span>
+                <div className="flex items-center gap-1.5 mb-1 min-w-0">
+                  <span className="text-xl shrink-0">{l.icon}</span>
+                  <span className="text-base font-medium text-gray-700 truncate">{l.name}</span>
                 </div>
-                <div className={`text-lg font-bold ${l.balance < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                <div className={`text-xl font-bold truncate ${l.balance < 0 ? 'text-red-500' : 'text-green-600'}`}>
                   {formatCurrency(l.balance)}
                 </div>
               </div>
