@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { addLedger, deleteLedger } from '@/actions/ledgers'
+import { addLedger, deleteLedger, transferBetweenLedgers } from '@/actions/ledgers'
 import { formatCurrency } from '@/lib/utils'
 
 interface LedgerWithBalance {
@@ -11,6 +11,8 @@ interface LedgerWithBalance {
   initial_balance: number
   balance: number
   spent: number
+  transferIn: number
+  transferOut: number
   created_by: string | null
 }
 
@@ -20,9 +22,10 @@ interface Props {
 }
 
 const ICON_OPTIONS = ['💰', '🏦', '💳', '🏧', '💵', '🪙', '🏠', '🚗', '✈️', '🎒']
+type Mode = 'list' | 'add' | 'transfer'
 
 export default function LedgersClient({ ledgers, currentUserId }: Props) {
-  const [showForm, setShowForm] = useState(false)
+  const [mode, setMode] = useState<Mode>('list')
   const [isPending, startTransition] = useTransition()
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [icon, setIcon] = useState('💰')
@@ -34,10 +37,22 @@ export default function LedgersClient({ ledgers, currentUserId }: Props) {
     startTransition(async () => {
       try {
         await addLedger(formData)
-        setShowForm(false)
+        setMode('list')
         setIcon('💰')
       } catch (err) {
         setError(err instanceof Error ? err.message : '新增失敗')
+      }
+    })
+  }
+
+  function handleTransfer(formData: FormData) {
+    setError(null)
+    startTransition(async () => {
+      try {
+        await transferBetweenLedgers(formData)
+        setMode('list')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '轉帳失敗')
       }
     })
   }
@@ -52,6 +67,11 @@ export default function LedgersClient({ ledgers, currentUserId }: Props) {
       await deleteLedger(id)
       setConfirmDelete(null)
     })
+  }
+
+  function cancel() {
+    setMode('list')
+    setError(null)
   }
 
   return (
@@ -72,7 +92,9 @@ export default function LedgersClient({ ledgers, currentUserId }: Props) {
                   <div>
                     <div className="font-semibold text-gray-800">{l.name}</div>
                     <div className="text-xs text-gray-400">
-                      初始 {formatCurrency(l.initial_balance)} · 已支出 {formatCurrency(l.spent)}
+                      初始 {formatCurrency(l.initial_balance)} · 支出 {formatCurrency(l.spent)}
+                      {l.transferIn > 0 && <span className="text-green-500"> · 轉入 +{formatCurrency(l.transferIn)}</span>}
+                      {l.transferOut > 0 && <span className="text-orange-500"> · 轉出 -{formatCurrency(l.transferOut)}</span>}
                     </div>
                   </div>
                 </div>
@@ -95,7 +117,6 @@ export default function LedgersClient({ ledgers, currentUserId }: Props) {
                   )}
                 </div>
               </div>
-              {/* 餘額進度條 */}
               {l.initial_balance > 0 && (
                 <div className="mt-3">
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -105,7 +126,7 @@ export default function LedgersClient({ ledgers, currentUserId }: Props) {
                     />
                   </div>
                   <div className="text-xs text-gray-400 mt-1 text-right">
-                    剩餘 {l.initial_balance > 0 ? Math.round((l.balance / l.initial_balance) * 100) : 0}%
+                    剩餘 {Math.round((l.balance / l.initial_balance) * 100)}%
                   </div>
                 </div>
               )}
@@ -114,8 +135,92 @@ export default function LedgersClient({ ledgers, currentUserId }: Props) {
         </div>
       )}
 
+      {/* 轉帳表單 */}
+      {mode === 'transfer' && (
+        <form action={handleTransfer} className="bg-white rounded-xl p-4 border-2 border-orange-200 space-y-4">
+          <h3 className="font-semibold text-gray-700">帳本轉帳</h3>
+
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</p>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">轉出帳本</label>
+            <select
+              name="from_ledger_id"
+              required
+              className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-orange-400 focus:outline-none"
+            >
+              <option value="">請選擇</option>
+              {ledgers.map(l => (
+                <option key={l.id} value={l.id}>
+                  {l.icon} {l.name} ({formatCurrency(l.balance)})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center justify-center text-2xl text-gray-400">→</div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">轉入帳本</label>
+            <select
+              name="to_ledger_id"
+              required
+              className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-orange-400 focus:outline-none"
+            >
+              <option value="">請選擇</option>
+              {ledgers.map(l => (
+                <option key={l.id} value={l.id}>
+                  {l.icon} {l.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">金額</label>
+            <input
+              name="amount"
+              type="number"
+              inputMode="decimal"
+              step="1"
+              min="1"
+              max="1000000"
+              required
+              placeholder="0"
+              className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-orange-400 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">備註（選填）</label>
+            <input
+              name="note"
+              type="text"
+              maxLength={100}
+              placeholder="例：撥款給旅遊基金"
+              className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-orange-400 focus:outline-none"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={isPending}
+              className="flex-1 py-3 bg-orange-500 text-white font-semibold rounded-xl disabled:opacity-50"
+            >
+              {isPending ? '轉帳中...' : '確認轉帳'}
+            </button>
+            <button type="button" onClick={cancel} className="flex-1 py-3 bg-gray-100 text-gray-600 font-semibold rounded-xl">
+              取消
+            </button>
+          </div>
+        </form>
+      )}
+
       {/* 新增帳本表單 */}
-      {showForm ? (
+      {mode === 'add' && (
         <form action={handleAdd} className="bg-white rounded-xl p-4 border-2 border-blue-200 space-y-4">
           <h3 className="font-semibold text-gray-700">新增帳本</h3>
 
@@ -123,7 +228,6 @@ export default function LedgersClient({ ledgers, currentUserId }: Props) {
             <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</p>
           )}
 
-          {/* Icon 選擇 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">圖示</label>
             <div className="flex gap-2 flex-wrap">
@@ -169,29 +273,34 @@ export default function LedgersClient({ ledgers, currentUserId }: Props) {
           </div>
 
           <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex-1 py-3 bg-blue-600 text-white font-semibold rounded-xl disabled:opacity-50"
-            >
+            <button type="submit" disabled={isPending} className="flex-1 py-3 bg-blue-600 text-white font-semibold rounded-xl disabled:opacity-50">
               {isPending ? '新增中...' : '新增'}
             </button>
-            <button
-              type="button"
-              onClick={() => { setShowForm(false); setError(null) }}
-              className="flex-1 py-3 bg-gray-100 text-gray-600 font-semibold rounded-xl"
-            >
+            <button type="button" onClick={cancel} className="flex-1 py-3 bg-gray-100 text-gray-600 font-semibold rounded-xl">
               取消
             </button>
           </div>
         </form>
-      ) : (
-        <button
-          onClick={() => setShowForm(true)}
-          className="w-full py-4 bg-white border-2 border-dashed border-blue-300 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 active:scale-95 transition-all"
-        >
-          ➕ 新增帳本
-        </button>
+      )}
+
+      {/* 底部按鈕 */}
+      {mode === 'list' && (
+        <div className="flex gap-2">
+          {ledgers.length >= 2 && (
+            <button
+              onClick={() => setMode('transfer')}
+              className="flex-1 py-4 bg-white border-2 border-dashed border-orange-300 text-orange-500 font-semibold rounded-xl hover:bg-orange-50 active:scale-95 transition-all"
+            >
+              🔄 帳本轉帳
+            </button>
+          )}
+          <button
+            onClick={() => setMode('add')}
+            className="flex-1 py-4 bg-white border-2 border-dashed border-blue-300 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 active:scale-95 transition-all"
+          >
+            ➕ 新增帳本
+          </button>
+        </div>
       )}
     </div>
   )

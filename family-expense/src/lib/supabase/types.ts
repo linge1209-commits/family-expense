@@ -27,6 +27,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ledger_transfers: {
+        Row: {
+          id: string
+          from_ledger_id: string
+          to_ledger_id: string
+          amount: number
+          note: string
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          from_ledger_id: string
+          to_ledger_id: string
+          amount: number
+          note?: string
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          note?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_transfers_from_ledger_id_fkey"
+            columns: ["from_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "ledgers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_transfers_to_ledger_id_fkey"
+            columns: ["to_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "ledgers"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       family_members: {
         Row: {
           id: string
@@ -160,6 +199,7 @@ export type FamilyMember = Database['public']['Tables']['family_members']['Row']
 export type MonthlyBudget = Database['public']['Tables']['monthly_budgets']['Row']
 export type Ledger = Database['public']['Tables']['ledgers']['Row']
 export type LedgerInsert = Database['public']['Tables']['ledgers']['Insert']
+export type LedgerTransfer = Database['public']['Tables']['ledger_transfers']['Row']
 
 export type TransactionWithCategory = Transaction & {
   categories: Pick<Category, 'id' | 'name' | 'icon'> | null
