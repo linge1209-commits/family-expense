@@ -6,13 +6,13 @@ import './globals.css'
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 
 export const metadata: Metadata = {
-  title: '家庭記帳本',
-  description: '家庭共用記帳 App',
+  title: 'YJ家庭記帳本',
+  description: 'YJ家庭共用記帳 App',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: '記帳本',
+    title: 'YJ記帳本',
     startupImage: '/icons/apple-touch-icon.png',
   },
   icons: {

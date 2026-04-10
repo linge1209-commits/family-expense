@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: '家庭記帳本',
-    short_name: '記帳本',
-    description: '家庭共用記帳 App',
+    name: 'YJ家庭記帳本',
+    short_name: 'YJ記帳本',
+    description: 'YJ家庭共用記帳 App',
     start_url: '/dashboard',
     display: 'standalone',
     background_color: '#F9FAFB',
