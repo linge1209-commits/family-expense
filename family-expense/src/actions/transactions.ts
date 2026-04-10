@@ -22,7 +22,7 @@ export async function addTransaction(formData: FormData) {
     throw new Error('金額無效（需介於 1 ~ 1,000,000）')
   }
 
-  const description = sanitizeDescription(formData.get('description') as string ?? '')
+  const description = sanitizeDescription((formData.get('description') as string) ?? '')
   if (description.length > 200) {
     throw new Error('描述長度不可超過 200 字')
   }
@@ -33,11 +33,14 @@ export async function addTransaction(formData: FormData) {
   const categoryId = formData.get('category_id')
   const date = (formData.get('date') as string) || new Date().toISOString().split('T')[0]
 
+  const ledgerId = formData.get('ledger_id') as string | null
+
   const insert: TransactionInsert = {
     amount,
     description,
     payer,
     category_id: categoryId ? parseInt(categoryId as string) : null,
+    ledger_id: ledgerId || null,
     date,
     added_by: user.id,
     added_by_email: user.email!,
@@ -103,7 +106,7 @@ export async function getTransactions(year: number, month: number) {
 
   const { data, error } = await supabase
     .from('transactions')
-    .select('*, categories(id, name, icon)')
+    .select('*, categories(id, name, icon), ledgers(id, name, icon)')
     .gte('date', startDate)
     .lte('date', endDate)
     .order('date', { ascending: false })
@@ -118,7 +121,7 @@ export async function getRecentTransactions(limit = 10) {
 
   const { data, error } = await supabase
     .from('transactions')
-    .select('*, categories(id, name, icon)')
+    .select('*, categories(id, name, icon), ledgers(id, name, icon)')
     .order('date', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(limit)

@@ -3,20 +3,22 @@
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { addTransaction } from '@/actions/transactions'
-import type { Category, FamilyMember } from '@/lib/supabase/types'
+import type { Category, FamilyMember, Ledger } from '@/lib/supabase/types'
 
 interface Props {
   categories: Category[]
   members: FamilyMember[]
   currentUserEmail: string
+  ledgers: Ledger[]
 }
 
-export default function TransactionForm({ categories, members, currentUserEmail }: Props) {
+export default function TransactionForm({ categories, members, currentUserEmail, ledgers }: Props) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
+  const [selectedLedger, setSelectedLedger] = useState<string | null>(ledgers[0]?.id ?? null)
 
   const currentMember = members.find(m => m.email === currentUserEmail)
   const [payer, setPayer] = useState(currentMember?.display_name ?? '')
@@ -33,6 +35,7 @@ export default function TransactionForm({ categories, members, currentUserEmail 
         await addTransaction(formData)
         formRef.current?.reset()
         setSelectedCategory(null)
+        setSelectedLedger(ledgers[0]?.id ?? null)
         router.push('/dashboard')
       } catch (err) {
         setError(err instanceof Error ? err.message : '新增失敗')
@@ -45,6 +48,30 @@ export default function TransactionForm({ categories, members, currentUserEmail 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">
           {error}
+        </div>
+      )}
+
+      {/* 帳本 */}
+      {ledgers.length > 0 && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">帳本</label>
+          <div className="flex gap-2 flex-wrap">
+            {ledgers.map(ledger => (
+              <button
+                key={ledger.id}
+                type="button"
+                onClick={() => setSelectedLedger(selectedLedger === ledger.id ? null : ledger.id)}
+                className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-all ${
+                  selectedLedger === ledger.id
+                    ? 'border-blue-500 bg-blue-500 text-white'
+                    : 'border-gray-200 text-gray-600'
+                }`}
+              >
+                {ledger.icon} {ledger.name}
+              </button>
+            ))}
+          </div>
+          <input type="hidden" name="ledger_id" value={selectedLedger ?? ''} />
         </div>
       )}
 

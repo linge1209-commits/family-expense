@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getRecentTransactions } from '@/actions/transactions'
 import { getCategories } from '@/actions/categories'
+import { getLedgersWithBalance } from '@/actions/ledgers'
 import TransactionCard from '@/components/transactions/TransactionCard'
 import { formatCurrency, formatMonthYear, getCurrentYearMonth } from '@/lib/utils'
 import { signOut } from '@/actions/auth'
@@ -11,9 +12,10 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   const { year, month } = getCurrentYearMonth()
-  const [transactions, categories] = await Promise.all([
+  const [transactions, categories, ledgers] = await Promise.all([
     getRecentTransactions(20),
     getCategories(),
+    getLedgersWithBalance(),
   ])
 
   // 本月統計
@@ -66,6 +68,29 @@ export default async function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* 帳本餘額 */}
+      {ledgers.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-bold text-gray-700">帳本餘額</h2>
+            <Link href="/ledgers" className="text-sm text-blue-500">管理</Link>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {ledgers.map(l => (
+              <div key={l.id} className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">{l.icon}</span>
+                  <span className="text-sm font-medium text-gray-700 truncate">{l.name}</span>
+                </div>
+                <div className={`text-lg font-bold ${l.balance < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                  {formatCurrency(l.balance)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 快速記帳按鈕 */}
       <Link

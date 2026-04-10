@@ -7,6 +7,7 @@ const navItems = [
   { href: '/dashboard', label: '首頁', icon: '🏠' },
   { href: '/add', label: '記帳', icon: '➕' },
   { href: '/history', label: '明細', icon: '📋' },
+  { href: '/ledgers', label: '帳本', icon: '📒' },
   { href: '/reports', label: '報表', icon: '📊' },
 ]
 

@@ -3,6 +3,30 @@ export type Json = string | number | boolean | null | { [key: string]: Json } | 
 export type Database = {
   public: {
     Tables: {
+      ledgers: {
+        Row: {
+          id: string
+          name: string
+          icon: string
+          initial_balance: number
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          icon?: string
+          initial_balance?: number
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          icon?: string
+          initial_balance?: number
+        }
+        Relationships: []
+      }
       family_members: {
         Row: {
           id: string
@@ -54,6 +78,7 @@ export type Database = {
           payer: string
           added_by: string | null
           added_by_email: string
+          ledger_id: string | null
           created_at: string
           updated_at: string
         }
@@ -66,6 +91,7 @@ export type Database = {
           payer: string
           added_by?: string | null
           added_by_email: string
+          ledger_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -75,6 +101,7 @@ export type Database = {
           category_id?: number | null
           description?: string
           payer?: string
+          ledger_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -124,7 +151,10 @@ export type TransactionInsert = Database['public']['Tables']['transactions']['In
 export type Category = Database['public']['Tables']['categories']['Row']
 export type FamilyMember = Database['public']['Tables']['family_members']['Row']
 export type MonthlyBudget = Database['public']['Tables']['monthly_budgets']['Row']
+export type Ledger = Database['public']['Tables']['ledgers']['Row']
+export type LedgerInsert = Database['public']['Tables']['ledgers']['Insert']
 
 export type TransactionWithCategory = Transaction & {
   categories: Pick<Category, 'id' | 'name' | 'icon'> | null
+  ledgers: Pick<Ledger, 'id' | 'name' | 'icon'> | null
 }

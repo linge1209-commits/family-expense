@@ -33,6 +33,7 @@ export default function TransactionCard({ transaction: tx, currentUserId }: Prop
         <div className="font-medium text-gray-800 truncate">{tx.description}</div>
         <div className="text-xs text-gray-400 mt-0.5">
           {tx.categories?.name ?? '其他'} · {tx.payer} · {formatDate(tx.date)}
+          {tx.ledgers && <span className="ml-1">· {tx.ledgers.icon} {tx.ledgers.name}</span>}
         </div>
       </div>
       <div className="flex items-center gap-2">
