@@ -6,7 +6,7 @@ import type { TransactionInsert, TransactionWithCategory } from '@/lib/supabase/
 
 function sanitizeDescription(text: string): string {
   const trimmed = text.trim()
-  if (trimmed.startsWith('=') || trimmed.startsWith('+') || trimmed.startsWith('-') || trimmed.startsWith('@')) {
+  if (trimmed.length > 0 && (trimmed.startsWith('=') || trimmed.startsWith('+') || trimmed.startsWith('-') || trimmed.startsWith('@'))) {
     throw new Error('描述欄位包含非法字元')
   }
   return trimmed
@@ -22,9 +22,9 @@ export async function addTransaction(formData: FormData) {
     throw new Error('金額無效（需介於 1 ~ 1,000,000）')
   }
 
-  const description = sanitizeDescription(formData.get('description') as string)
-  if (!description || description.length > 200) {
-    throw new Error('描述長度需在 1~200 字之間')
+  const description = sanitizeDescription(formData.get('description') as string ?? '')
+  if (description.length > 200) {
+    throw new Error('描述長度不可超過 200 字')
   }
 
   const payer = (formData.get('payer') as string).trim()

@@ -62,7 +62,7 @@ export default function TransactionForm({ categories, members, currentUserEmail 
             max="1000000"
             required
             placeholder="0"
-            className="w-full pl-8 pr-4 py-4 text-2xl font-bold border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
+            className="w-full pl-8 pr-4 py-4 text-2xl font-bold text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
           />
         </div>
       </div>
@@ -95,10 +95,9 @@ export default function TransactionForm({ categories, members, currentUserEmail 
         <input
           name="description"
           type="text"
-          required
           maxLength={200}
           placeholder="例：麥當勞午餐"
-          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
+          className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
         />
       </div>
 
@@ -131,7 +130,7 @@ export default function TransactionForm({ categories, members, currentUserEmail 
           name="date"
           type="date"
           defaultValue={new Date().toISOString().split('T')[0]}
-          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
+          className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
         />
       </div>
 
