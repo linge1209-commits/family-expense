@@ -3,7 +3,8 @@
     "allow": [
       "Bash(dir \"C:\\\\Users\\\\brian_lin\\\\source\\\\repos\\\\FamilyMoney\")",
       "Bash(npm run:*)",
-      "Bash(find /c/Users/brian_lin/source/repos/family-expense/src -type f \\\\\\( -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.js\" -o -name \"*.jsx\" \\\\\\) -exec grep -l \"password\\\\|secret\\\\|api.key\\\\|token\" {} \\\\;)"
+      "Bash(find /c/Users/brian_lin/source/repos/family-expense/src -type f \\\\\\( -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.js\" -o -name \"*.jsx\" \\\\\\) -exec grep -l \"password\\\\|secret\\\\|api.key\\\\|token\" {} \\\\;)",
+      "Bash(git config:*)"
     ]
   }
 }
