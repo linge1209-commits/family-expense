@@ -61,6 +61,29 @@ export default function TransactionForm({ categories, members, currentUserEmail,
     setAmountValid(false)
   }
 
+  function playSuccessSound() {
+    try {
+      const ctx = new AudioContext()
+      const now = ctx.currentTime
+      ;[659, 880].forEach((freq, i) => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.type = 'sine'
+        osc.frequency.value = freq
+        const t = now + i * 0.12
+        gain.gain.setValueAtTime(0, t)
+        gain.gain.linearRampToValueAtTime(0.25, t + 0.02)
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35)
+        osc.start(t)
+        osc.stop(t + 0.35)
+      })
+    } catch {
+      // AudioContext not available (e.g. SSR)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
@@ -72,6 +95,7 @@ export default function TransactionForm({ categories, members, currentUserEmail,
     startTransition(async () => {
       try {
         await addTransaction(formData)
+        playSuccessSound()
         formRef.current?.reset()
         setSelectedCategory(null)
         router.push('/dashboard')
@@ -210,12 +234,14 @@ export default function TransactionForm({ categories, members, currentUserEmail,
       {/* 日期 */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
-        <input
-          name="date"
-          type="date"
-          defaultValue={new Date().toISOString().split('T')[0]}
-          className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
-        />
+        <div className="w-full overflow-hidden">
+          <input
+            name="date"
+            type="date"
+            defaultValue={new Date().toISOString().split('T')[0]}
+            className="w-full max-w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
+          />
+        </div>
       </div>
 
       <button
