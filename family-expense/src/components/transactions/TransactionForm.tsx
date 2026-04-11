@@ -179,13 +179,13 @@ export default function TransactionForm({ categories, members, currentUserEmail,
       {/* 分類 */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">分類</label>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-6 gap-1.5">
           {filteredCategories.map(cat => (
             <button
               key={cat.id}
               type="button"
               onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
-              className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
+              className={`flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all ${
                 selectedCategory === cat.id
                   ? isIncome
                     ? 'border-green-500 bg-green-50 text-green-700'
@@ -193,8 +193,8 @@ export default function TransactionForm({ categories, members, currentUserEmail,
                   : 'border-gray-100 bg-gray-50 text-gray-600'
               }`}
             >
-              <span className="text-2xl">{cat.icon}</span>
-              <span className="text-xs mt-1 font-medium">{cat.name}</span>
+              <span className="text-xl">{cat.icon}</span>
+              <span className="text-xs mt-0.5 font-medium leading-tight text-center">{cat.name}</span>
             </button>
           ))}
         </div>
