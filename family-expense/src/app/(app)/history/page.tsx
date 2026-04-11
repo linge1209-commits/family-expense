@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getTransactions } from '@/actions/transactions'
+import { getCategories, getFamilyMembers } from '@/actions/categories'
 import TransactionCard from '@/components/transactions/TransactionCard'
 import { formatMonthYear, getCurrentYearMonth } from '@/lib/utils'
 
@@ -16,7 +17,11 @@ export default async function HistoryPage({ searchParams }: Props) {
   const year = parseInt(params.year ?? String(currentYear))
   const month = parseInt(params.month ?? String(currentMonth))
 
-  const transactions = await getTransactions(year, month)
+  const [transactions, categories, members] = await Promise.all([
+    getTransactions(year, month),
+    getCategories(),
+    getFamilyMembers(),
+  ])
   const expense = transactions.filter(tx => tx.type !== 'income').reduce((sum, tx) => sum + tx.amount, 0)
   const income = transactions.filter(tx => tx.type === 'income').reduce((sum, tx) => sum + tx.amount, 0)
 
@@ -82,6 +87,8 @@ export default async function HistoryPage({ searchParams }: Props) {
               key={tx.id}
               transaction={tx}
               currentUserId={user?.id ?? ''}
+              categories={categories}
+              members={members}
             />
           ))}
         </div>

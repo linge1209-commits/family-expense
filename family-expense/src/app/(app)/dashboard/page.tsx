@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getRecentTransactions } from '@/actions/transactions'
-import { getCategories } from '@/actions/categories'
+import { getCategories, getFamilyMembers } from '@/actions/categories'
 import { getLedgersWithBalance } from '@/actions/ledgers'
 import TransactionCard from '@/components/transactions/TransactionCard'
 import SpecialDayGreeting from '@/components/SpecialDayGreeting'
@@ -13,10 +13,11 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   const { year, month } = getCurrentYearMonth()
-  const [transactions, categories, ledgers] = await Promise.all([
+  const [transactions, categories, ledgers, members] = await Promise.all([
     getRecentTransactions(20),
     getCategories(),
     getLedgersWithBalance(),
+    getFamilyMembers(),
   ])
 
   // 本月統計
@@ -132,6 +133,8 @@ export default async function DashboardPage() {
                 key={tx.id}
                 transaction={tx}
                 currentUserId={user?.id ?? ''}
+                categories={categories}
+                members={members}
               />
             ))}
           </div>
