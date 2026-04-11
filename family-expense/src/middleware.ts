@@ -49,19 +49,33 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login?error=not_authorized', request.url))
     }
 
-    // 驗證是否在家庭成員白名單
-    const { data: member } = await supabase
-      .from('family_members')
-      .select('email')
-      .eq('email', email)
-      .maybeSingle()
+    // 快取：若驗證 cookie 與目前 email 相符，跳過 DB 查詢（節省一次 Supabase roundtrip）
+    const FM_COOKIE = 'fm_v'
+    const fmCookie = request.cookies.get(FM_COOKIE)
 
-    if (!member) {
-      // 不在白名單：登出並導回登入頁，附上錯誤說明
-      await supabase.auth.signOut()
-      return NextResponse.redirect(
-        new URL('/login?error=not_authorized', request.url)
-      )
+    if (fmCookie?.value !== email) {
+      // Cookie 不存在或 email 不符，重新查詢白名單
+      const { data: member } = await supabase
+        .from('family_members')
+        .select('email')
+        .eq('email', email)
+        .maybeSingle()
+
+      if (!member) {
+        await supabase.auth.signOut()
+        return NextResponse.redirect(
+          new URL('/login?error=not_authorized', request.url)
+        )
+      }
+
+      // 驗證成功，寫入 cookie（1 小時有效）
+      supabaseResponse.cookies.set(FM_COOKIE, email, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 3600,
+        path: '/',
+      })
     }
   }
 
