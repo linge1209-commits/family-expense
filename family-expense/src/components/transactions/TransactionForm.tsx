@@ -65,22 +65,50 @@ export default function TransactionForm({ categories, members, currentUserEmail,
     try {
       const ctx = new AudioContext()
       const now = ctx.currentTime
-      ;[659, 880].forEach((freq, i) => {
+
+      // Metallic coin tings (coins falling)
+      const tings: [number, number, number][] = [
+        [2093, 0.00, 0.22],
+        [2637, 0.08, 0.18],
+        [1976, 0.15, 0.15],
+        [2349, 0.22, 0.12],
+      ]
+      tings.forEach(([freq, t, vol]) => {
         const osc = ctx.createOscillator()
         const gain = ctx.createGain()
         osc.connect(gain)
         gain.connect(ctx.destination)
-        osc.type = 'sine'
+        osc.type = 'triangle'
         osc.frequency.value = freq
-        const t = now + i * 0.12
-        gain.gain.setValueAtTime(0, t)
-        gain.gain.linearRampToValueAtTime(0.25, t + 0.02)
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35)
-        osc.start(t)
-        osc.stop(t + 0.35)
+        const start = now + t
+        gain.gain.setValueAtTime(0, start)
+        gain.gain.linearRampToValueAtTime(vol, start + 0.005)
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22)
+        osc.start(start)
+        osc.stop(start + 0.25)
       })
+
+      // Muffled fabric thud (landing in pocket)
+      const bufSize = Math.floor(ctx.sampleRate * 0.18)
+      const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate)
+      const data = buf.getChannelData(0)
+      for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1
+      const noise = ctx.createBufferSource()
+      noise.buffer = buf
+      const lp = ctx.createBiquadFilter()
+      lp.type = 'lowpass'
+      lp.frequency.value = 350
+      const noiseGain = ctx.createGain()
+      noise.connect(lp)
+      lp.connect(noiseGain)
+      noiseGain.connect(ctx.destination)
+      const thudAt = now + 0.28
+      noiseGain.gain.setValueAtTime(0.18, thudAt)
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, thudAt + 0.18)
+      noise.start(thudAt)
+      noise.stop(thudAt + 0.2)
     } catch {
-      // AudioContext not available (e.g. SSR)
+      // AudioContext not available
     }
   }
 
