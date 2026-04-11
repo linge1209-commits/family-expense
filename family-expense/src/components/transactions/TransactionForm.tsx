@@ -66,30 +66,38 @@ export default function TransactionForm({ categories, members, currentUserEmail,
       const ctx = new AudioContext()
       const now = ctx.currentTime
 
-      // Metallic coin tings (coins falling)
-      const tings: [number, number, number][] = [
-        [2093, 0.00, 0.22],
-        [2637, 0.08, 0.18],
-        [1976, 0.15, 0.15],
-        [2349, 0.22, 0.12],
+      // Coin physics: circular disc has inharmonic partials at ratios 1 : 2.756 : 5.404
+      // Using sine waves (not triangle) to avoid electronic buzz
+      const PARTIALS = [1, 2.756, 5.404]
+      const coins: [number, number, number][] = [
+        [1800, 0.00, 0.14],
+        [2200, 0.09, 0.12],
+        [1600, 0.17, 0.10],
+        [2000, 0.25, 0.08],
       ]
-      tings.forEach(([freq, t, vol]) => {
-        const osc = ctx.createOscillator()
-        const gain = ctx.createGain()
-        osc.connect(gain)
-        gain.connect(ctx.destination)
-        osc.type = 'triangle'
-        osc.frequency.value = freq
-        const start = now + t
-        gain.gain.setValueAtTime(0, start)
-        gain.gain.linearRampToValueAtTime(vol, start + 0.005)
-        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22)
-        osc.start(start)
-        osc.stop(start + 0.25)
+
+      coins.forEach(([baseFreq, t, vol]) => {
+        PARTIALS.forEach((ratio, pi) => {
+          const osc = ctx.createOscillator()
+          const gain = ctx.createGain()
+          osc.connect(gain)
+          gain.connect(ctx.destination)
+          osc.type = 'sine'
+          osc.frequency.value = baseFreq * ratio
+          const start = now + t
+          // Higher partials are quieter and decay faster (physically accurate)
+          const pVol = vol / (pi + 1)
+          const decay = 0.35 / (pi * 0.6 + 1)
+          gain.gain.setValueAtTime(0, start)
+          gain.gain.linearRampToValueAtTime(pVol, start + 0.003)
+          gain.gain.exponentialRampToValueAtTime(0.001, start + decay)
+          osc.start(start)
+          osc.stop(start + decay + 0.02)
+        })
       })
 
       // Muffled fabric thud (landing in pocket)
-      const bufSize = Math.floor(ctx.sampleRate * 0.18)
+      const bufSize = Math.floor(ctx.sampleRate * 0.15)
       const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate)
       const data = buf.getChannelData(0)
       for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1
@@ -97,16 +105,16 @@ export default function TransactionForm({ categories, members, currentUserEmail,
       noise.buffer = buf
       const lp = ctx.createBiquadFilter()
       lp.type = 'lowpass'
-      lp.frequency.value = 350
+      lp.frequency.value = 300
       const noiseGain = ctx.createGain()
       noise.connect(lp)
       lp.connect(noiseGain)
       noiseGain.connect(ctx.destination)
-      const thudAt = now + 0.28
-      noiseGain.gain.setValueAtTime(0.18, thudAt)
-      noiseGain.gain.exponentialRampToValueAtTime(0.001, thudAt + 0.18)
+      const thudAt = now + 0.33
+      noiseGain.gain.setValueAtTime(0.15, thudAt)
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, thudAt + 0.15)
       noise.start(thudAt)
-      noise.stop(thudAt + 0.2)
+      noise.stop(thudAt + 0.18)
     } catch {
       // AudioContext not available
     }
