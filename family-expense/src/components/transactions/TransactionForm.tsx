@@ -142,6 +142,7 @@ export default function TransactionForm({ categories, members, currentUserEmail,
         <label className="block text-sm font-medium text-gray-700 mb-1">金額</label>
         <AmountInput
           isIncome={isIncome}
+          autoFocus
           onChange={v => setAmountValid(v !== null)}
         />
       </div>

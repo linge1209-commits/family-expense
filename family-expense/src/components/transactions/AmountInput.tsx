@@ -19,10 +19,11 @@ interface Props {
   isIncome?: boolean
   /** Smaller size variant for modals */
   compact?: boolean
+  autoFocus?: boolean
   onChange?: (value: number | null) => void
 }
 
-export default function AmountInput({ defaultValue, isIncome, compact = false, onChange }: Props) {
+export default function AmountInput({ defaultValue, isIncome, compact = false, autoFocus, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [expr, setExpr] = useState(defaultValue != null ? String(defaultValue) : '')
 
@@ -64,6 +65,7 @@ export default function AmountInput({ defaultValue, isIncome, compact = false, o
           value={expr}
           onChange={handleChange}
           placeholder="0"
+          autoFocus={autoFocus}
           className={`w-full pl-8 pr-20 ${sizeCls} font-bold text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:outline-none ${focusCls}`}
         />
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
