@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 /** Evaluates a +/- only expression. Returns null if invalid or result ≤ 0. */
 function evalExpr(raw: string): number | null {
@@ -23,6 +23,7 @@ interface Props {
 }
 
 export default function AmountInput({ defaultValue, isIncome, compact = false, onChange }: Props) {
+  const inputRef = useRef<HTMLInputElement>(null)
   const [expr, setExpr] = useState(defaultValue != null ? String(defaultValue) : '')
 
   const computed = evalExpr(expr)
@@ -49,6 +50,7 @@ export default function AmountInput({ defaultValue, isIncome, compact = false, o
     const next = expr + op
     setExpr(next)
     onChange?.(evalExpr(next))
+    inputRef.current?.focus()
   }
 
   return (
@@ -56,6 +58,7 @@ export default function AmountInput({ defaultValue, isIncome, compact = false, o
       <div className="relative">
         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
         <input
+          ref={inputRef}
           type="text"
           inputMode="decimal"
           value={expr}
