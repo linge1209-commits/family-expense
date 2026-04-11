@@ -19,8 +19,11 @@ export default function BottomNav() {
       <div className="flex max-w-lg mx-auto">
         {navItems.map(({ href, label, icon }) => {
           const isActive = pathname === href
+          // /add uses a hard navigation so the browser's native autoFocus
+          // opens the keyboard on iOS/PWA (SPA navigation blocks it)
+          const Tag = href === '/add' ? 'a' : Link
           return (
-            <Link
+            <Tag
               key={href}
               href={href}
               className={`flex flex-1 flex-col items-center justify-center py-2 min-h-[56px] text-xs font-medium transition-colors ${
@@ -31,7 +34,7 @@ export default function BottomNav() {
             >
               <span className="text-xl mb-0.5">{icon}</span>
               <span>{label}</span>
-            </Link>
+            </Tag>
           )
         })}
       </div>
