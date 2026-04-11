@@ -212,39 +212,37 @@ export default function TransactionForm({ categories, members, currentUserEmail,
         />
       </div>
 
-      {/* 付款人 */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          {isIncome ? '收款人' : '付款人'}
-        </label>
-        <div className="flex gap-2 flex-wrap">
-          {members.map(member => (
-            <button
-              key={member.id}
-              type="button"
-              onClick={() => handleSetPayer(member.display_name)}
-              className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-all ${
-                payer === member.display_name
-                  ? 'border-blue-500 bg-blue-500 text-white'
-                  : 'border-gray-200 text-gray-600'
-              }`}
-            >
-              {member.display_name}
-            </button>
-          ))}
+      {/* 付款人 + 日期 */}
+      <div className="flex gap-3 items-end">
+        <div className="flex-1 min-w-0">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {isIncome ? '收款人' : '付款人'}
+          </label>
+          <div className="flex gap-2 flex-wrap">
+            {members.map(member => (
+              <button
+                key={member.id}
+                type="button"
+                onClick={() => handleSetPayer(member.display_name)}
+                className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-all ${
+                  payer === member.display_name
+                    ? 'border-blue-500 bg-blue-500 text-white'
+                    : 'border-gray-200 text-gray-600'
+                }`}
+              >
+                {member.display_name}
+              </button>
+            ))}
+          </div>
+          <input type="hidden" name="payer" value={payer} />
         </div>
-        <input type="hidden" name="payer" value={payer} />
-      </div>
-
-      {/* 日期 */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
-        <div className="w-full overflow-hidden">
+        <div className="shrink-0 overflow-hidden">
+          <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
           <input
             name="date"
             type="date"
             defaultValue={new Date().toISOString().split('T')[0]}
-            className="w-full max-w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
+            className="max-w-full px-3 py-2 text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none text-sm"
           />
         </div>
       </div>
