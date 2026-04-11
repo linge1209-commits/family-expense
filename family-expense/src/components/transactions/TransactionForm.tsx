@@ -4,6 +4,7 @@ import { useRef, useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { addTransaction } from '@/actions/transactions'
 import type { Category, FamilyMember, Ledger } from '@/lib/supabase/types'
+import AmountInput from './AmountInput'
 
 interface Props {
   categories: Category[]
@@ -22,6 +23,7 @@ export default function TransactionForm({ categories, members, currentUserEmail,
   const [error, setError] = useState<string | null>(null)
   const [txType, setTxType] = useState<'expense' | 'income'>('expense')
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
+  const [amountValid, setAmountValid] = useState(false)
 
   const currentMember = members.find(m => m.email === currentUserEmail)
 
@@ -56,6 +58,7 @@ export default function TransactionForm({ categories, members, currentUserEmail,
   function handleTypeChange(type: 'expense' | 'income') {
     setTxType(type)
     setSelectedCategory(null)
+    setAmountValid(false)
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -137,22 +140,10 @@ export default function TransactionForm({ categories, members, currentUserEmail,
       {/* 金額 */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">金額</label>
-        <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
-          <input
-            name="amount"
-            type="number"
-            inputMode="decimal"
-            step="1"
-            min="1"
-            max="1000000"
-            required
-            placeholder="0"
-            className={`w-full pl-8 pr-4 py-4 text-2xl font-bold text-gray-900 bg-white border-2 rounded-xl focus:outline-none ${
-              isIncome ? 'focus:border-green-500 border-gray-200' : 'focus:border-red-400 border-gray-200'
-            }`}
-          />
-        </div>
+        <AmountInput
+          isIncome={isIncome}
+          onChange={v => setAmountValid(v !== null)}
+        />
       </div>
 
       {/* 分類 */}
@@ -228,7 +219,7 @@ export default function TransactionForm({ categories, members, currentUserEmail,
 
       <button
         type="submit"
-        disabled={isPending || !payer}
+        disabled={isPending || !payer || !amountValid}
         className={`w-full py-4 text-white text-lg font-bold rounded-xl disabled:opacity-50 active:scale-95 transition-all ${
           isIncome ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-600 hover:bg-blue-700'
         }`}

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { updateTransaction } from '@/actions/transactions'
 import type { Category, FamilyMember, TransactionWithCategory } from '@/lib/supabase/types'
+import AmountInput from './AmountInput'
 
 interface Props {
   transaction: TransactionWithCategory
@@ -16,6 +17,7 @@ export default function EditTransactionModal({ transaction: tx, categories, memb
   const [error, setError] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<number | null>(tx.category_id)
   const [payer, setPayer] = useState(tx.payer)
+  const [amountValid, setAmountValid] = useState(true)
 
   const filteredCategories = categories.filter(c => c.type === tx.type)
 
@@ -62,20 +64,11 @@ export default function EditTransactionModal({ transaction: tx, categories, memb
           {/* 金額 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">金額</label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
-              <input
-                name="amount"
-                type="number"
-                inputMode="decimal"
-                step="1"
-                min="1"
-                max="1000000"
-                required
-                defaultValue={tx.amount}
-                className="w-full pl-8 pr-4 py-3 text-xl font-bold text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
-              />
-            </div>
+            <AmountInput
+              defaultValue={tx.amount}
+              compact
+              onChange={v => setAmountValid(v !== null)}
+            />
           </div>
 
           {/* 分類 */}
@@ -152,7 +145,7 @@ export default function EditTransactionModal({ transaction: tx, categories, memb
 
           <button
             type="submit"
-            disabled={isPending || !payer}
+            disabled={isPending || !payer || !amountValid}
             className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl disabled:opacity-50 active:scale-95 transition-all"
           >
             {isPending ? '儲存中...' : '儲存變更'}
