@@ -1,3 +1,4 @@
+import { connection } from 'next/server'
 import { getTransactions } from '@/actions/transactions'
 import { getCategories } from '@/actions/categories'
 import { getCurrentYearMonth, formatCurrency, formatMonthYear } from '@/lib/utils'
@@ -5,6 +6,7 @@ import CategoryChart from '@/components/reports/CategoryChart'
 import MonthlyChart from '@/components/reports/MonthlyChart'
 
 export default async function ReportsPage() {
+  await connection()
   const { year, month } = getCurrentYearMonth()
 
   // 抓最近 6 個月的月份列表
