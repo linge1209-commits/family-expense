@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import NavLinkWithLoading from './NavLinkWithLoading'
 
 const navItems = [
   { href: '/dashboard', label: '首頁', icon: '🏠' },
@@ -19,22 +20,32 @@ export default function BottomNav() {
       <div className="flex max-w-lg mx-auto">
         {navItems.map(({ href, label, icon }) => {
           const isActive = pathname === href
-          // /add uses a hard navigation so the browser's native autoFocus
-          // opens the keyboard on iOS/PWA (SPA navigation blocks it)
-          const Tag = href === '/add' ? 'a' : Link
+          if (href === '/add') {
+            // hard navigation so the browser's native autoFocus opens the keyboard on iOS/PWA
+            return (
+              <NavLinkWithLoading
+                key={href}
+                href={href}
+                className={`flex flex-1 flex-col items-center justify-center py-2 min-h-[56px] text-xs font-medium transition-colors ${
+                  isActive ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <span className="text-xl mb-0.5">{icon}</span>
+                <span>{label}</span>
+              </NavLinkWithLoading>
+            )
+          }
           return (
-            <Tag
+            <Link
               key={href}
               href={href}
               className={`flex flex-1 flex-col items-center justify-center py-2 min-h-[56px] text-xs font-medium transition-colors ${
-                isActive
-                  ? 'text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                isActive ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               <span className="text-xl mb-0.5">{icon}</span>
               <span>{label}</span>
-            </Tag>
+            </Link>
           )
         })}
       </div>
