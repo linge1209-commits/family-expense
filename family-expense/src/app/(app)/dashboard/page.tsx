@@ -7,6 +7,7 @@ import SpecialDayGreeting from '@/components/SpecialDayGreeting'
 import { formatCurrency, formatMonthYear, getCurrentYearMonth } from '@/lib/utils'
 import { signOut } from '@/actions/auth'
 import Link from 'next/link'
+import NavLinkWithLoading from '@/components/ui/NavLinkWithLoading'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -107,13 +108,13 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* 快速記帳按鈕 — 用 <a> 做 hard navigation，讓 autoFocus 能開啟鍵盤 */}
-      <a
+      {/* 快速記帳按鈕 — 用 hard navigation 讓 autoFocus 能開啟鍵盤，點擊時顯示載入效果 */}
+      <NavLinkWithLoading
         href="/add"
         className="flex items-center justify-center gap-2 w-full py-4 bg-white border-2 border-dashed border-blue-300 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 active:scale-95 transition-all"
       >
         <span className="text-xl">➕</span> 新增支出
-      </a>
+      </NavLinkWithLoading>
 
       {/* 最近記錄 */}
       <div>
