@@ -12,14 +12,14 @@ export default function CategoryChart({ data }: Props) {
   const chartData = data.map(d => ({ name: `${d.icon} ${d.name}`, value: d.total }))
 
   return (
-    <ResponsiveContainer width="100%" height={240}>
+    <ResponsiveContainer width="100%" height={280}>
       <PieChart>
         <Pie
           data={chartData}
           cx="50%"
-          cy="50%"
-          innerRadius={60}
-          outerRadius={90}
+          cy="45%"
+          innerRadius={55}
+          outerRadius={85}
           paddingAngle={3}
           dataKey="value"
         >
