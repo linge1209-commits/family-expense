@@ -59,12 +59,13 @@ export default async function ReportsPage({ searchParams }: Props) {
         <h1 className="text-2xl font-bold text-gray-800">報表分析</h1>
       </div>
 
-      <MonthSwitcher year={year} month={month} />
-
-      {/* 所選月份總計 */}
+      {/* 月份切換 + 總計 */}
       <div className="bg-white rounded-xl p-4 border border-gray-100">
-        <div className="text-sm text-gray-500">{formatMonthYear(year, month)} 總支出</div>
-        <div className="text-3xl font-bold text-gray-800 mt-1">{formatCurrency(thisMonthTotal)}</div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-sm text-gray-500">總支出</div>
+          <MonthSwitcher year={year} month={month} />
+        </div>
+        <div className="text-3xl font-bold text-gray-800">{formatCurrency(thisMonthTotal)}</div>
       </div>
 
       {/* 分類圓餅圖 */}
