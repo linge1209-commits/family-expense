@@ -4,12 +4,20 @@ import { getCategories } from '@/actions/categories'
 import { getCurrentYearMonth, formatCurrency, formatMonthYear } from '@/lib/utils'
 import CategoryChart from '@/components/reports/CategoryChart'
 import MonthlyChart from '@/components/reports/MonthlyChart'
+import MonthSwitcher from '@/components/reports/MonthSwitcher'
 
-export default async function ReportsPage() {
+interface Props {
+  searchParams: Promise<{ year?: string; month?: string }>
+}
+
+export default async function ReportsPage({ searchParams }: Props) {
   await connection()
-  const { year, month } = getCurrentYearMonth()
+  const params = await searchParams
+  const current = getCurrentYearMonth()
+  const year = params.year ? parseInt(params.year) : current.year
+  const month = params.month ? parseInt(params.month) : current.month
 
-  // 抓最近 6 個月的月份列表
+  // 抓所選月份往前 6 個月的月份列表
   const months: { year: number; month: number }[] = []
   for (let i = 0; i < 6; i++) {
     const d = new Date(year, month - 1 - i, 1)
@@ -23,9 +31,10 @@ export default async function ReportsPage() {
 
   const thisMonthTxns = allTxns[0]
 
-  // 本月各分類加總
+  // 所選月份各分類加總（只算支出）
   const categoryMap: Record<number, { name: string; icon: string; total: number }> = {}
   for (const tx of thisMonthTxns) {
+    if (tx.type === 'income') continue
     if (!tx.category_id) continue
     const cat = categories.find(c => c.id === tx.category_id)
     if (!cat) continue
@@ -36,24 +45,24 @@ export default async function ReportsPage() {
   }
   const categoryData = Object.values(categoryMap).sort((a, b) => b.total - a.total)
 
-  // 每月加總
+  // 每月加總（只算支出）
   const monthlyData = allTxns.map((txns, i) => ({
     label: formatMonthYear(months[i].year, months[i].month),
-    total: txns.reduce((sum, tx) => sum + tx.amount, 0),
+    total: txns.filter(tx => tx.type !== 'income').reduce((sum, tx) => sum + tx.amount, 0),
   })).reverse()
 
-  const thisMonthTotal = thisMonthTxns.reduce((sum, tx) => sum + tx.amount, 0)
+  const thisMonthTotal = thisMonthTxns.filter(tx => tx.type !== 'income').reduce((sum, tx) => sum + tx.amount, 0)
 
   return (
     <div className="p-4 space-y-6">
-      <div className="pt-4">
+      <div className="pt-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">報表分析</h1>
-        <p className="text-gray-500 text-sm mt-1">{formatMonthYear(year, month)}</p>
+        <MonthSwitcher year={year} month={month} />
       </div>
 
-      {/* 本月總計 */}
+      {/* 所選月份總計 */}
       <div className="bg-white rounded-xl p-4 border border-gray-100">
-        <div className="text-sm text-gray-500">本月總支出</div>
+        <div className="text-sm text-gray-500">{formatMonthYear(year, month)} 總支出</div>
         <div className="text-3xl font-bold text-gray-800 mt-1">{formatCurrency(thisMonthTotal)}</div>
       </div>
 
@@ -74,7 +83,7 @@ export default async function ReportsPage() {
       {/* 分類排行 */}
       {categoryData.length > 0 && (
         <div className="bg-white rounded-xl p-4 border border-gray-100">
-          <h2 className="font-bold text-gray-700 mb-3">本月分類排行</h2>
+          <h2 className="font-bold text-gray-700 mb-3">分類排行</h2>
           <div className="space-y-3">
             {categoryData.map(cat => (
               <div key={cat.name} className="flex items-center gap-3">
