@@ -24,6 +24,44 @@ html, body {
   max-width: 100vw;
 }
 
+/* =============================================
+   Page transition (View Transitions API)
+   exit: fade + slide down → brief white screen
+   enter: fade + slide up (delayed overlap)
+   ============================================= */
+
+::view-transition-old(root) {
+  animation: 180ms ease-in both vt-fade-out;
+}
+::view-transition-new(root) {
+  animation: 240ms ease-out 120ms both vt-fade-in;
+}
+
+@keyframes vt-fade-out {
+  to { opacity: 0; transform: translateY(6px); }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+/* Keep BottomNav fixed — no animation */
+::view-transition-group(bottom-nav) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(bottom-nav) { display: none; }
+::view-transition-new(bottom-nav) { animation: none; }
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
