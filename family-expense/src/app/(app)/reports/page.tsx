@@ -55,10 +55,11 @@ export default async function ReportsPage({ searchParams }: Props) {
 
   return (
     <div className="p-4 space-y-6">
-      <div className="pt-4 flex items-center justify-between">
+      <div className="pt-4">
         <h1 className="text-2xl font-bold text-gray-800">報表分析</h1>
-        <MonthSwitcher year={year} month={month} />
       </div>
+
+      <MonthSwitcher year={year} month={month} />
 
       {/* 所選月份總計 */}
       <div className="bg-white rounded-xl p-4 border border-gray-100">
